@@ -43,6 +43,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 4px 14px;
+    flex-wrap: wrap;
+    gap: 10px;
   }
   .lang-switch {
     display: flex;
@@ -55,11 +57,36 @@
   .lang-switch button {
     border: none; background: transparent; font-size: 12px; font-weight: 700;
     letter-spacing: 0.5px; padding: 7px 14px; border-radius: 999px; cursor: pointer;
-    color: var(--muted); font-family: Helvetica, Arial, sans-serif;
+    color: var(--muted); font-family: Helvetica, Arial, sans-serif; white-space: nowrap;
   }
   .lang-switch button.active { background: #16181c; color: #fff; }
   .lang-switch button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #cfcfcf;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    background: rgba(255,255,255,0.08);
+    padding: 8px 16px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .back-link:hover { background: rgba(255,255,255,0.16); }
+  .back-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .contact-link {
+    color: #9a9a9a;
+    font-size: 12px;
+    text-decoration: none;
+  }
+  .contact-link:hover { color: #cfcfcf; text-decoration: underline; }
+
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .topbar-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
   .slide-counter {
     color: #cfcfcf;
     font-size: 13px;
@@ -250,6 +277,15 @@
   .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.25); cursor: pointer; border: none; padding: 0; }
   .dot.active { background: #fff; }
 
+  @media (max-width: 640px) {
+    .topbar { justify-content: center; }
+    .topbar-left { flex-wrap: wrap; justify-content: center; }
+    .topbar-right { align-items: center; width: 100%; }
+    .back-link { font-size: 12px; padding: 7px 12px; }
+    .lang-switch button { padding: 6px 11px; font-size: 11px; }
+    .contact-link { font-size: 11px; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .lamp-icon, .blind-slats, .object-cup, .object-pencil, .pov-box, .poster, .door-panel {
       animation: none !important;
@@ -260,11 +296,23 @@
 <body class="lang-en" id="body-root">
 
   <div class="topbar">
-    <div class="lang-switch" role="group" aria-label="Language / 言語">
-      <button type="button" id="btn-en" class="active" onclick="setLang('en')">EN</button>
-      <button type="button" id="btn-jp" onclick="setLang('jp')">日本語</button>
+    <div class="topbar-left">
+      <a class="back-link" href="https://afraworld.github.io/first-second-calibration/">
+        <span class="lang-en-txt">&larr; Back to Overview</span>
+        <span class="lang-jp-txt">&larr; 概要ページへ戻る</span>
+      </a>
+      <div class="lang-switch" role="group" aria-label="Language / 言語">
+        <button type="button" id="btn-en" class="active" onclick="setLang('en')">EN</button>
+        <button type="button" id="btn-jp" onclick="setLang('jp')">日本語</button>
+      </div>
     </div>
-    <div class="slide-counter"><span id="counter-cur">1</span> / <span id="counter-total">6</span></div>
+    <div class="topbar-right">
+      <div class="slide-counter"><span id="counter-cur">1</span> / <span id="counter-total">6</span></div>
+      <a class="contact-link" href="mailto:julianagras@gmail.com?subject=First-Second%20Calibration%20%E2%80%94%20Question">
+        <span class="lang-en-txt">Contact the researcher</span>
+        <span class="lang-jp-txt">研究者へのお問い合わせ</span>
+      </a>
+    </div>
   </div>
 
   <div class="stage-wrap">
