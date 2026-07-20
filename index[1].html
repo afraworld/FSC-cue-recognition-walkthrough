@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>First-Second Calibration — Research Proposal</title>
+<meta name="description" content="A language-light behavioural retrieval pilot for earthquake readiness among international students. School-facing research proposal for ISI Language School, Osaka.">
+<style>
+  :root {
+    --ink: #16181c;
+    --accent: #3d5a80;
+    --accent-soft: #c7d2e0;
+    --muted: #6b6f76;
+    --paper: #fcfcfb;
+    --panel: #eeede7;
+    --card: #ffffff;
+    --line: #e2e0d8;
+    --shadow: 0 10px 30px -12px rgba(22,24,28,0.14), 0 2px 8px -2px rgba(22,24,28,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  body.lang-jp {
+    font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.9;
+  }
+
+  a { color: inherit; }
+  .serif { font-family: Georgia, "Times New Roman", serif; }
+  body.lang-jp .serif { font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", Georgia, serif; }
+
+  /* ---------- Language switcher ---------- */
+  .lang-switch {
+    position: fixed;
+    top: 14px;
+    right: 18px;
+    z-index: 20;
+    display: flex;
+    background: var(--card);
+    border-radius: 999px;
+    box-shadow: var(--shadow);
+    padding: 4px;
+    gap: 2px;
+  }
+  .lang-switch button {
+    border: none;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--muted);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  .lang-switch button.active { background: var(--ink); color: #fff; }
+  .lang-switch button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- Language visibility ---------- */
+  .lang-block { display: none !important; }
+  body.lang-en .lang-block.lang-en,
+  body.lang-jp .lang-block.lang-jp {
+    display: block !important;
+  }
+  body.lang-en .split.lang-block.lang-en,
+  body.lang-jp .split.lang-block.lang-jp,
+  body.lang-en .stats.lang-block.lang-en,
+  body.lang-jp .stats.lang-block.lang-jp {
+    display: flex !important;
+  }
+
+  /* ---------- Masthead ---------- */
+  .masthead {
+    position: relative;
+    z-index: 5;
+    border-bottom: 1px solid var(--line);
+    padding: 14px 24px;
+    text-align: center;
+    background: var(--paper);
+  }
+  .masthead span {
+    font-size: 12px;
+    letter-spacing: 2.5px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  /* ---------- Hero + floating cue objects (shared, language-agnostic) ---------- */
+  .hero-wrap { position: relative; overflow: hidden; padding-bottom: 10px; }
+
+  .ripple-bg {
+    position: absolute; top: 50%; left: 50%;
+    width: 900px; height: 900px;
+    transform: translate(-50%, -55%);
+    pointer-events: none; z-index: 0; opacity: 0.5;
+  }
+  .ripple-bg circle { fill: none; stroke: var(--accent-soft); stroke-width: 1; }
+  @keyframes ripple-pulse {
+    0%, 100% { transform: translate(-50%, -55%) scale(1); }
+    50% { transform: translate(-50%, -55%) scale(1.035); }
+  }
+  .ripple-bg { animation: ripple-pulse 9s ease-in-out infinite; }
+
+  .cue-icon { position: absolute; z-index: 1; opacity: 0.55; color: var(--accent); pointer-events: none; will-change: transform; }
+  .cue-icon svg { width: 100%; height: 100%; display: block; }
+
+  @keyframes sway-a { 0%,100% { transform: rotate(-3deg) translateY(0); } 50% { transform: rotate(3deg) translateY(-6px); } }
+  @keyframes sway-b { 0%,100% { transform: rotate(2.5deg) translateY(0); } 50% { transform: rotate(-2.5deg) translateY(-8px); } }
+  @keyframes sway-c { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-10px) rotate(-2deg); } }
+  @keyframes sway-d { 0%,100% { transform: rotate(-2deg); } 50% { transform: rotate(4deg); } }
+
+  .cue-lamp   { top: 10%;  left: 7%;   width: 74px; height: 74px;  animation: sway-a 6.5s ease-in-out infinite; transform-origin: top center; }
+  .cue-blind  { top: 16%;  right: 8%;  width: 84px; height: 84px;  animation: sway-b 7.5s ease-in-out infinite; }
+  .cue-object { bottom: 14%; left: 11%; width: 58px; height: 58px; animation: sway-c 5.8s ease-in-out infinite; }
+  .cue-door   { bottom: 10%; right: 10%; width: 70px; height: 70px; animation: sway-d 8.2s ease-in-out infinite; transform-origin: left center; }
+
+  .hero { position: relative; z-index: 3; max-width: 860px; margin: 0 auto; padding: 88px 24px 34px; text-align: center; }
+  .hero .eyebrow { font-size: 13px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 26px; }
+  .hero h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700; font-size: clamp(42px, 7vw, 72px);
+    line-height: 1.06; letter-spacing: -0.5px;
+  }
+  body.lang-jp .hero h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.3; }
+  .hero .subtitle {
+    font-family: Georgia, serif; font-style: italic; font-size: 20px; color: #333;
+    max-width: 620px; margin: 30px auto 12px; line-height: 1.5;
+  }
+  body.lang-jp .hero .subtitle { font-family: inherit; font-style: normal; font-size: 17px; line-height: 1.9; }
+  .hero .byline { font-size: 14px; color: var(--muted); font-style: italic; }
+  body.lang-jp .hero .byline { font-style: normal; }
+
+  /* ---------- Seismograph trace divider (shared) ---------- */
+  .trace-wrap { position: relative; z-index: 3; max-width: 900px; margin: 18px auto 8px; padding: 0 24px; }
+  .trace-wrap svg { width: 100%; height: auto; display: block; }
+  .trace-path {
+    fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round;
+    stroke-dasharray: 1400; stroke-dashoffset: 1400;
+    animation: draw-trace 2.2s cubic-bezier(0.65,0,0.35,1) forwards 0.3s;
+  }
+  @keyframes draw-trace { to { stroke-dashoffset: 0; } }
+  .trace-caption { text-align: center; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+  body.lang-jp .trace-caption { letter-spacing: 0.5px; }
+
+  /* ---------- Decision card ---------- */
+  .decision {
+    position: relative; z-index: 3; max-width: 760px; margin: 40px auto; padding: 26px 30px;
+    background: var(--card); border-radius: 14px; box-shadow: var(--shadow); border-left: 3px solid var(--accent);
+  }
+  .decision strong {
+    font-style: italic; display: block; margin-bottom: 6px; letter-spacing: 0.5px;
+    font-size: 13px; text-transform: uppercase; color: var(--accent);
+  }
+  body.lang-jp .decision strong { font-style: normal; }
+  .decision p { font-size: 15.5px; line-height: 1.7; }
+  body.lang-jp .decision p { line-height: 1.9; }
+
+  /* ---------- Info strip ---------- */
+  .info-strip { max-width: 920px; margin: 0 auto 64px; padding: 0 24px; position: relative; z-index: 3; }
+  .info-grid { display: flex; flex-wrap: wrap; gap: 18px; }
+  .info-grid > div { flex: 1 1 240px; background: var(--card); border-radius: 12px; box-shadow: var(--shadow); padding: 20px 22px; }
+  .info-grid .label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; font-weight: 700; }
+  .info-grid .value { font-size: 15.5px; }
+
+  /* ---------- Body sections ---------- */
+  .section { max-width: 780px; margin: 0 auto; padding: 0 24px 52px; }
+  .section h2 { font-family: Georgia, serif; font-size: 24px; font-weight: 700; margin-bottom: 20px; position: relative; display: inline-block; }
+  body.lang-jp .section h2 { font-size: 21px; }
+  .section h2::after { content: ""; position: absolute; left: 0; bottom: -8px; width: 46px; height: 3px; background: var(--accent); border-radius: 2px; }
+  .section p { font-size: 16px; color: #2a2a2a; margin-bottom: 16px; margin-top: 24px; }
+
+  /* ---------- Sequence bar ---------- */
+  .sequence-bar {
+    position: relative; z-index: 3; background: var(--ink); color: #fff; text-align: center;
+    padding: 30px 20px; margin: 0 auto 64px; max-width: 1040px; border-radius: 16px; box-shadow: var(--shadow);
+    font-family: Georgia, serif; font-weight: 700; font-size: clamp(14px, 2.4vw, 19px); letter-spacing: 0.5px;
+  }
+  body.lang-jp .sequence-bar { font-family: inherit; font-size: clamp(13px, 2.2vw, 17px); }
+  .sequence-bar .arrow { color: var(--accent-soft); margin: 0 8px; font-weight: 400; }
+
+  /* ---------- Two-column: what/what-not ---------- */
+  .split { max-width: 920px; margin: 0 auto 60px; padding: 0 24px; display: flex; flex-wrap: wrap; gap: 20px; }
+  .split > div { flex: 1 1 320px; background: var(--card); border-radius: 14px; box-shadow: var(--shadow); padding: 26px 28px; }
+  .split h3 { font-family: Georgia, serif; font-size: 16px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; color: var(--accent); }
+  body.lang-jp .split h3 { font-family: inherit; letter-spacing: 0.5px; }
+  .split ul { list-style: none; }
+  .split li { font-size: 15px; padding-left: 18px; position: relative; margin-bottom: 12px; color: #2a2a2a; }
+  .split li::before { content: "\2014"; position: absolute; left: 0; color: var(--muted); }
+
+  /* ---------- Stats row ---------- */
+  .stats { max-width: 920px; margin: 0 auto 72px; padding: 0 24px; display: flex; flex-wrap: wrap; text-align: center; gap: 18px; }
+  .stats > div { flex: 1 1 240px; background: var(--card); border-radius: 14px; box-shadow: var(--shadow); padding: 26px 16px; }
+  .stats .num { font-family: Georgia, serif; font-weight: 700; font-size: 32px; color: var(--accent); }
+  .stats .lbl { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-top: 8px; }
+  body.lang-jp .stats .lbl { letter-spacing: 0.5px; }
+
+  /* ---------- CTA ---------- */
+  .cta { padding: 20px 24px 80px; text-align: center; position: relative; z-index: 3; }
+  .cta-inner { max-width: 640px; margin: 0 auto; background: var(--ink); color: #fff; border-radius: 20px; padding: 56px 40px; box-shadow: var(--shadow); }
+  .cta .eyebrow { font-size: 12px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent-soft); margin-bottom: 14px; }
+  .cta h2 { font-family: Georgia, serif; font-size: 28px; margin-bottom: 16px; color: #fff; }
+  body.lang-jp .cta h2 { font-family: inherit; font-size: 24px; }
+  .cta p { font-size: 15px; color: #d7d7d7; margin-bottom: 30px; line-height: 1.6; }
+  body.lang-jp .cta p { line-height: 1.9; }
+  .cta-button {
+    display: inline-block; background: #fff; color: var(--ink); text-decoration: none;
+    padding: 16px 40px; font-size: 14px; letter-spacing: 1.5px; text-transform: uppercase;
+    font-weight: 700; border-radius: 999px; transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  body.lang-jp .cta-button { letter-spacing: 0.5px; }
+  .cta-button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,255,255,0.18); }
+  .cta-button:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 3px; }
+  .cta-caption { margin-top: 18px; font-size: 13px; font-style: italic; color: #a9a9a9; }
+  body.lang-jp .cta-caption { font-style: normal; }
+
+  footer { text-align: center; padding: 30px 24px; font-size: 12px; color: var(--muted); position: relative; z-index: 3; }
+
+  @media (max-width: 640px) {
+    .cue-icon { display: none; }
+    .ripple-bg { width: 600px; height: 600px; }
+    .lang-switch { top: 10px; right: 10px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .ripple-bg, .cue-lamp, .cue-blind, .cue-object, .cue-door { animation: none; }
+    .trace-path { animation: none; stroke-dashoffset: 0; }
+    .cta-button { transition: none; }
+  }
+</style>
+</head>
+<body class="lang-en" id="body-root">
+
+  <div class="lang-switch" role="group" aria-label="Language / 言語">
+    <button type="button" id="btn-en" class="active" onclick="setLang('en')">EN</button>
+    <button type="button" id="btn-jp" onclick="setLang('jp')">日本語</button>
+  </div>
+
+  <div class="masthead">
+    <span class="lang-block lang-en">THE FIRST-SECOND CALIBRATION REVIEW</span>
+    <span class="lang-block lang-jp">ファースト・セカンド・キャリブレーション提案書</span>
+  </div>
+
+  <div class="hero-wrap">
+    <svg class="ripple-bg" viewBox="0 0 900 900" aria-hidden="true">
+      <circle cx="450" cy="450" r="180"/><circle cx="450" cy="450" r="280"/>
+      <circle cx="450" cy="450" r="380"/><circle cx="450" cy="450" r="440"/>
+    </svg>
+
+    <div class="cue-icon cue-lamp" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="32" y1="4" x2="32" y2="18"/>
+        <path d="M14 18 Q32 8 50 18 L45 33 Q32 39 19 33 Z"/>
+        <line x1="21" y1="46" x2="17" y2="53"/><line x1="32" y1="47" x2="32" y2="55"/><line x1="43" y1="46" x2="47" y2="53"/>
+      </svg>
+    </div>
+    <div class="cue-icon cue-blind" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <rect x="8" y="6" width="48" height="52" rx="2"/>
+        <line x1="8" y1="18" x2="56" y2="18"/><line x1="8" y1="28" x2="56" y2="28"/>
+        <line x1="8" y1="38" x2="56" y2="38"/><line x1="8" y1="48" x2="56" y2="48"/>
+      </svg>
+    </div>
+    <div class="cue-icon cue-object" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <rect x="10" y="30" width="20" height="18" rx="2"/><line x1="10" y1="38" x2="30" y2="38"/>
+        <line x1="38" y1="46" x2="52" y2="18"/><path d="M50 16 l4 2 -2 4 z"/>
+      </svg>
+    </div>
+    <div class="cue-icon cue-door" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M14 58 V10 L46 4 V54 Z"/><line x1="14" y1="58" x2="50" y2="58"/><circle cx="40" cy="32" r="1.6" fill="currentColor"/>
+      </svg>
+    </div>
+
+    <!-- HERO: EN -->
+    <section class="hero lang-block lang-en">
+      <div class="eyebrow">School-Facing Research Proposal · July 2026</div>
+      <h1 class="serif">First-Second<br>Calibration</h1>
+      <p class="subtitle">A language-light behavioural retrieval pilot for earthquake readiness among international students.</p>
+      <p class="byline">Proposed for ISI Language School, Osaka — by Yuliana Grasman (Afra)</p>
+    </section>
+    <!-- HERO: JP -->
+    <section class="hero lang-block lang-jp">
+      <div class="eyebrow">学校向け研究提案書 · 2026年7月</div>
+      <h1 class="serif">ファースト・セカンド<br>キャリブレーション</h1>
+      <p class="subtitle">国際生を対象とした、言語的負担の少ない地震時初動行動に関する実行可能性調査</p>
+      <p class="byline">提出先：ISI日本語学校（大阪校）　提案者：ユリアナ・グラスマン（アフラ）</p>
+    </section>
+
+    <div class="trace-wrap" aria-hidden="true">
+      <svg viewBox="0 0 900 90" preserveAspectRatio="none">
+        <path class="trace-path" d="M0,45 L60,45 L75,10 L90,80 L105,15 L120,70 L135,25 L150,60 L165,45
+          L185,45 L200,30 L215,60 L230,40 L245,50 L260,45
+          L290,45 L305,38 L320,50 L335,45
+          L400,45 L900,45"/>
+      </svg>
+    </div>
+    <div class="trace-caption lang-block lang-en">From ambiguous signal to a settled, trained response</div>
+    <div class="trace-caption lang-block lang-jp">あいまいな信号から、訓練された落ち着いた行動へ</div>
+  </div>
+
+  <!-- DECISION: EN -->
+  <div class="decision lang-block lang-en">
+    <strong>Decision requested from ISI</strong>
+    <p>Approval in principle to review the framework, confirm the school-approved classroom action, and — only after staff and safety review — host a small voluntary pilot.</p>
+  </div>
+  <!-- DECISION: JP -->
+  <div class="decision lang-block lang-jp">
+    <strong>ISI貴校へのお願い</strong>
+    <p>本提案の枠組みをご検討いただき、学校が承認する教室内行動をご確認いただいたうえで、安全面・運営面のご審査を経て、初めて小規模な任意参加パイロットの実施をご許可いただくという、原則的なご承認をお願いするものです。</p>
+  </div>
+
+  <!-- INFO STRIP: EN -->
+  <div class="info-strip lang-block lang-en">
+    <div class="info-grid">
+      <div><div class="label">Site</div><div class="value">ISI Language School, Osaka</div></div>
+      <div><div class="label">Educational Approach</div><div class="value">Behavioural retrieval feasibility pilot</div></div>
+      <div><div class="label">Focus</div><div class="value">Recognition of cue → Retrieval → Approved first action</div></div>
+    </div>
+  </div>
+  <!-- INFO STRIP: JP -->
+  <div class="info-strip lang-block lang-jp">
+    <div class="info-grid">
+      <div><div class="label">対象校</div><div class="value">ISI日本語学校 大阪校</div></div>
+      <div><div class="label">研究の位置づけ</div><div class="value">行動科学に基づく実行可能性調査</div></div>
+      <div><div class="label">焦点</div><div class="value">きざしの認識 → 想起 → 承認済み初動行動</div></div>
+    </div>
+  </div>
+
+  <!-- THE QUESTION: EN -->
+  <section class="section lang-block lang-en">
+    <h2>The Question</h2>
+    <p>Japan already has extensive school-safety systems: approved procedures, trained staff, and regular drills. This pilot does not propose a new one. It asks a narrower question — can students access an already-approved classroom action from the physical cue itself, rather than relying exclusively on a later alarm, verbal instruction, or the movement of others?</p>
+    <p>The first pilot is deliberately small and low-risk: one ordinary classroom, one school-confirmed action, a short visual module, and a brief assessment task. There is no surprise shaking, no change to the school's existing drill, and no claim that a classroom pilot predicts survival in a real earthquake.</p>
+  </section>
+  <!-- THE QUESTION: JP -->
+  <section class="section lang-block lang-jp">
+    <h2>研究の問い</h2>
+    <p>日本にはすでに充実した学校安全体制が整っています。承認済みの対応手順、訓練された教職員、そして定期的な避難訓練です。本パイロットは新しい対応手順を提案するものではありません。より狭い問いを扱います——生徒は、後の警報や言葉による指示、あるいは周囲の人の動きだけに頼るのではなく、身体で感じた物理的なきざしそのものから、既に承認されている教室内行動にたどり着くことができるでしょうか。</p>
+    <p>最初のパイロットは、意図的に小規模かつ低リスクに設計されています。通常の教室ひとつ、学校が確認した行動ひとつ、短い視覚教材、そして簡潔な評価課題です。予告なしの揺れの体験はなく、学校の既存の避難訓練を変更することもなく、また教室での調査結果が実際の地震における生存を予測するという主張も一切ありません。</p>
+  </section>
+
+  <!-- SEQUENCE BAR: EN -->
+  <div class="sequence-bar lang-block lang-en">
+    POSSIBLE SHAKING <span class="arrow">→</span> RECOGNISE CUE <span class="arrow">→</span> RETRIEVE APPROVED ACTION <span class="arrow">→</span> TEACHER / ISI PROCEDURE
+  </div>
+  <!-- SEQUENCE BAR: JP -->
+  <div class="sequence-bar lang-block lang-jp">
+    揺れの可能性 <span class="arrow">→</span> きざしに気づく <span class="arrow">→</span> 承認済み行動を想起する <span class="arrow">→</span> 教員／ISIの対応手順へ
+  </div>
+
+  <!-- SPLIT: EN -->
+  <div class="split lang-block lang-en">
+    <div>
+      <h3>What This Tests</h3>
+      <ul>
+        <li>Whether students can recognise an ambiguous physical cue before any alarm.</li>
+        <li>Whether the approved action can be retrieved before external confirmation.</li>
+        <li>Whether that improvement is still detectable two weeks later.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>What This Is Not</h3>
+      <ul>
+        <li>Not a new safety procedure — the action is ISI's own.</li>
+        <li>Not a change to the existing school drill.</li>
+        <li>Not a claim about real-earthquake survival or outcomes.</li>
+      </ul>
+    </div>
+  </div>
+  <!-- SPLIT: JP -->
+  <div class="split lang-block lang-jp">
+    <div>
+      <h3>本パイロットが検証すること</h3>
+      <ul>
+        <li>生徒が警報より前に、あいまいな身体的きざしに気づけるかどうか。</li>
+        <li>外部からの確認より前に、承認済みの行動を想起できるかどうか。</li>
+        <li>その改善が2週間後も検出可能かどうか。</li>
+      </ul>
+    </div>
+    <div>
+      <h3>本パイロットが扱わないこと</h3>
+      <ul>
+        <li>新しい安全対応手順の提案ではありません——行動はISI自身のものです。</li>
+        <li>既存の避難訓練を変更するものではありません。</li>
+        <li>実際の地震における生存や結果を保証するものではありません。</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- STATS: EN -->
+  <div class="stats lang-block lang-en">
+    <div><div class="num">20–30</div><div class="lbl">Adult Volunteers</div></div>
+    <div><div class="num">25 + 10</div><div class="lbl">Minutes, Session + Follow-Up</div></div>
+    <div><div class="num">1</div><div class="lbl">Classroom, One Environment</div></div>
+  </div>
+  <!-- STATS: JP -->
+  <div class="stats lang-block lang-jp">
+    <div><div class="num">20〜30</div><div class="lbl">成人ボランティア</div></div>
+    <div><div class="num">25＋10</div><div class="lbl">セッション＋フォローアップ（分）</div></div>
+    <div><div class="num">1</div><div class="lbl">教室・単一環境</div></div>
+  </div>
+
+  <!-- CTA: EN -->
+  <div class="cta lang-block lang-en">
+    <div class="cta-inner">
+      <div class="eyebrow">See the Mechanism</div>
+      <h2 class="serif">Illustrative Walkthrough</h2>
+      <p>A short interactive draft showing how the cue-recognition and assessment task work. It uses a generic classroom and a labelled placeholder action — not final materials, and not a preview of ISI's confirmed procedure.</p>
+      <a class="cta-button" href="https://afraworld.github.io/FSC-cue-recognition-walkthrough/" target="_blank" rel="noopener noreferrer">View the Walkthrough</a>
+      <div class="cta-caption">Draft demo, subject to ISI review — placeholder action shown throughout.</div>
+    </div>
+  </div>
+  <!-- CTA: JP -->
+  <div class="cta lang-block lang-jp">
+    <div class="cta-inner">
+      <div class="eyebrow">メカニズムを見る</div>
+      <h2 class="serif">体験版ウォークスルー</h2>
+      <p>きざしの認識と評価課題の仕組みを示す、短い体験版です。一般的な教室設定と、明示的にプレースホルダーと表示された行動を使用しています。最終教材ではなく、ISIが承認する対応手順を先取りするものでもありません。</p>
+      <a class="cta-button" href="https://afraworld.github.io/FSC-cue-recognition-walkthrough/" target="_blank" rel="noopener noreferrer">ウォークスルーを見る</a>
+      <div class="cta-caption">体験版デモ（ISIのご審査を前提とした草案）——プレースホルダーの行動を一貫して使用しています。</div>
+    </div>
+  </div>
+
+  <footer>
+    <span class="lang-block lang-en">Confidential concept proposal for institutional review · Yuliana Grasman (Afra) · Student ID: G26S07081 · <a href="mailto:juliaanagras@gmail.com" style="color:inherit;">Contact the researcher</a></span>
+    <span class="lang-block lang-jp">機関内審査用・秘密資料 · ユリアナ・グラスマン（アフラ）· 学籍番号：G26S07081 · <a href="mailto:juliaanagras@gmail.com" style="color:inherit;">研究者へのお問い合わせ</a></span>
+  </footer>
+
+  <script>
+    function setLang(lang) {
+      var body = document.getElementById('body-root');
+      var html = document.getElementById('html-root');
+      body.classList.remove('lang-en', 'lang-jp');
+      body.classList.add('lang-' + lang);
+      html.lang = (lang === 'jp') ? 'ja' : 'en';
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+      document.getElementById('btn-jp').classList.toggle('active', lang === 'jp');
+      try { localStorage.setItem('fsc-lang', lang); } catch (e) {}
+    }
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem('fsc-lang'); } catch (e) {}
+      if (saved === 'jp' || saved === 'en') { setLang(saved); }
+    })();
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var icons = document.querySelectorAll('.cue-icon');
+      var heroWrap = document.querySelector('.hero-wrap');
+      heroWrap.addEventListener('mousemove', function (e) {
+        var rect = heroWrap.getBoundingClientRect();
+        var relX = (e.clientX - rect.left) / rect.width - 0.5;
+        var relY = (e.clientY - rect.top) / rect.height - 0.5;
+        icons.forEach(function (icon, i) {
+          var depth = (i + 1) * 4;
+          icon.style.marginLeft = (relX * depth) + 'px';
+          icon.style.marginTop = (relY * depth) + 'px';
+        });
+      });
+    }
+  </script>
+
+</body>
+</html>
