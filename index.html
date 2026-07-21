@@ -29,7 +29,7 @@
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    padding: 16px;
+    padding: 10px;
   }
   body.lang-jp {
     font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", Helvetica, Arial, sans-serif;
@@ -42,7 +42,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 4px 14px;
+    padding: 0 4px 10px;
     flex-wrap: wrap;
     gap: 10px;
   }
@@ -101,15 +101,8 @@
   .stage-wrap {
     width: 100%;
     max-width: 1100px;
+    min-height: clamp(480px, 82vh, 660px);
     position: relative;
-  }
-  .stage-ratio {
-    width: 100%;
-    padding-top: 56.25%; /* 16:9 fallback for browsers without aspect-ratio support */
-  }
-  .stage-inner {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
     border-radius: 14px;
     overflow: hidden;
     box-shadow: var(--shadow);
@@ -155,9 +148,9 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: clamp(16px, 3vw, 40px);
-    padding: clamp(10px, 2vw, 20px) clamp(16px, 6vw, 100px);
-    overflow: hidden;
+    gap: clamp(18px, 3vw, 40px);
+    padding: clamp(16px, 2.5vw, 28px) clamp(20px, 6vw, 100px);
+    overflow-y: auto;
   }
 
   /* ---------- Slide 1: Orientation ---------- */
@@ -264,7 +257,7 @@
   .nav-controls {
     width: 100%; max-width: 1100px;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 4px 4px;
+    padding: 10px 4px 4px;
   }
   .nav-btn {
     background: var(--panel); border: none; border-radius: 999px; padding: 12px 26px;
@@ -315,9 +308,7 @@
     </div>
   </div>
 
-  <div class="stage-wrap">
-    <div class="stage-ratio"></div>
-    <div class="stage-inner" id="stage">
+  <div class="stage-wrap" id="stage">
 
     <!-- ============ SLIDE 1: ORIENTATION ============ -->
     <div class="slide active" data-slide="1">
@@ -477,7 +468,6 @@
       </div>
     </div>
 
-  </div>
   </div>
 
   <div class="nav-controls">
